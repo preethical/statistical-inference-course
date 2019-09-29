@@ -1,0 +1,121 @@
+---
+title: "Basic Inferential Data Analysis"
+author: "preethi"
+date: "9/27/2019"
+output: pdf_document
+---
+
+## Basic Inferential Data Analysis
+
+In the second portion of this project, we are going to analyse the toothgrowth data
+First 
+Q1) load the tooth growth data and perform some basic exploratory analysis
+
+```{r echo = TRUE}
+##load data
+library(datasets)
+data("ToothGrowth")
+##display structure of data
+str(ToothGrowth)
+##summarize data
+summary(ToothGrowth)
+```
+Q2) Provide a basic summary of the data
+
+```{r include=FALSE}
+library(datasets)
+library(dplyr)
+data("ToothGrowth")
+```
+```{r echo = TRUE}
+##basic summary of data grouped by supplements
+groups <- group_by(ToothGrowth, supp)
+summary_groups <- summarise(groups, count = n(),
+                            "Mean" = mean(len), 
+                            "Std dev" = sd(len))
+print(summary_groups)
+```
+
+The basic exploratory analysis show us that,
+
+1. There were two supplements tested for growth of teeth (OJ & VC) at three concentrations (0.5, 1 & 2 mg/day).
+
+2. There were an equal number of samples (30) for both supplements.
+
+3. OJ showed greater tooth growth compared to VC. 
+
+Below is a graphical representation of the data
+
+```{r include=FALSE}
+library(datasets)
+library(dplyr)
+library(ggplot2)
+data("ToothGrowth")
+```
+```{r echo = TRUE}
+##grouped by supplements & dose
+
+groups <- group_by(ToothGrowth, supp)
+summary_groups <- summarise(groups, count = n(),
+                            "Mean" = mean(len), 
+                            "Std dev" = sd(len))
+##creating a bar plot of the data grouped by supplements
+tooth <- ggplot(data = ToothGrowth, 
+                aes(x=as.factor(dose),y=len,fill=supp))+
+  geom_bar(stat='identity', position='dodge')+
+  xlab("Dose(mg/day)")+ylab("Tooth length(mm)")+
+  ggtitle("The effect of supplements on tooth growth in guinea pigs")
+
+print(tooth)
+```
+
+Q3) Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+### Comparison by Supplement
+
+Comparison of teeth length between supplements was done by a single T-test ($\alpha$ = 0.05). 
+The null hypothesis (H0) is: there is no difference in teeth length between the two supplements
+
+```{r echo = TRUE}
+## t test for effect of supplements
+hyp01<- t.test(len~supp, ToothGrowth)
+
+hyp01
+```
+
+Conclusion: 
+As one can see from the first table, there is no significant difference (0.06) between the two supplements and tooth growth. 
+
+In the tests that were split by dose, there was a significant difference between the two supplements for doses:  0.5 mg & 1mg (p-values of 0.006 &0.001 respectively)
+
+### Comparison by Dose
+
+Comparison of teeth length between doses irrespective of supplement was done by three T-tests ($\alpha$ = 0.05). 
+
+The null hypothesis (H0) is: there is no difference in tooth length between dose 0.5 & 2. 
+
+```{r echo = TRUE}
+
+Split_Dose<-split(ToothGrowth, ToothGrowth$dose)
+
+names(Split_Dose) <- c("half", "one","two")
+
+hypdose <- t.test(Split_Dose$half$len, Split_Dose$two$len)
+
+hypdose
+```
+Conclusion: The p-value is 4.397525e-14 and therefore we reject the null hypothesis in favor of the alternate hypothesis. 
+
+Q4: State your conclusions and the assumptions needed for your conclusions.
+
+### Assumptions:
+
+1) It is assumed that the data is collected from a representative, randomly selected portion of the total population. 
+2)The second assumption is the data, when plotted, results in a normal distribution, bell-shaped distribution curve.
+3)The final assumption is homogeneity of variance. Homogeneous, or equal, variance exists when the standard deviations of samples are approximately equal.
+
+### Conclusions: 
+
+1)As one can see from the first table, there is no significant difference (0.06) between the two supplements and tooth growth. 
+2)The p-value for dose related response is 4.397525e-14 and therefore we reject the null hypothesis in favor of the alternate hypothesis, that there is a difference in tooth between doses 0.5 & 2 
+3)Further analysis was done since the bonferroni corrections would need to be included and the sample size was deemed too small for that. 

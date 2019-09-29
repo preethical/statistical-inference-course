@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Basic Inferential Data Analysis</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h2>Basic Inferential Data Analysis</h2>
+
+<p>In the second portion of this project, we are going to analyse the toothgrowth data
+First 
+Q1) load the tooth growth data and perform some basic exploratory analysis</p>
+
+<pre><code class="r">library(datasets)
+data(&quot;ToothGrowth&quot;)
+str(ToothGrowth)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    60 obs. of  3 variables:
+##  $ len : num  4.2 11.5 7.3 5.8 6.4 10 11.2 11.2 5.2 7 ...
+##  $ supp: Factor w/ 2 levels &quot;OJ&quot;,&quot;VC&quot;: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ dose: num  0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+</code></pre>
+
+<pre><code class="r">library(datasets)
+data(&quot;ToothGrowth&quot;)
+summary(ToothGrowth)
+</code></pre>
+
+<pre><code>##       len        supp         dose      
+##  Min.   : 4.20   OJ:30   Min.   :0.500  
+##  1st Qu.:13.07   VC:30   1st Qu.:0.500  
+##  Median :19.25           Median :1.000  
+##  Mean   :18.81           Mean   :1.167  
+##  3rd Qu.:25.27           3rd Qu.:2.000  
+##  Max.   :33.90           Max.   :2.000
+</code></pre>
+
+<p>Q2) Provide a basic summary of the data</p>
+
+<pre><code class="r">library(datasets)
+library(dplyr)
+</code></pre>
+
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;
+</code></pre>
+
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag
+</code></pre>
+
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union
+</code></pre>
+
+<pre><code class="r">data(&quot;ToothGrowth&quot;)
+##summary(ToothGrowth)
+groups &lt;- group_by(ToothGrowth, supp)
+summary_groups &lt;- summarise(groups, count = n(),&quot;Mean&quot; = mean(len), &quot;Std dev&quot; = sd(len))
+print(summary_groups)
+</code></pre>
+
+<pre><code>## # A tibble: 2 x 4
+##   supp  count  Mean `Std dev`
+##   &lt;fct&gt; &lt;int&gt; &lt;dbl&gt;     &lt;dbl&gt;
+## 1 OJ       30  20.7      6.61
+## 2 VC       30  17.0      8.27
+</code></pre>
+
+<p>The basic exploratory analysis show us that,</p>
+
+<ol>
+<li><p>There were two supplements tested for growth of teeth at three concentrations (0.5, 1 &amp; 2).</p></li>
+<li><p>There were equal number of samples (30) for both supplements</p></li>
+<li><p>OJ showed greater tooth growth compared to VC</p></li>
+</ol>
+
+<p>Below is a graphical representation of the data</p>
+
+<pre><code class="r">library(datasets)
+library(dplyr)
+library(ggplot2)
+data(&quot;ToothGrowth&quot;)
+groups &lt;- group_by(ToothGrowth, supp)
+summary_groups &lt;- summarise(groups, count = n(),&quot;Mean&quot; = mean(len), &quot;Std dev&quot; = sd(len))
+tooth &lt;- ggplot(data = ToothGrowth, aes(x=as.factor(dose),y=len,fill=supp))+geom_bar(stat=&#39;identity&#39;, position=&#39;dodge&#39;)+xlab(&quot;Dose(mg/day)&quot;)+ylab(&quot;Tooth length(mm)&quot;)+ggtitle(&quot;The effect of supplements on tooth growth in guinea pigs&quot;)
+print(tooth)
+</code></pre>
+
+<p><img src="figure/unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4"></p>
+
+<p>Q3) Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there&#39;s other approaches worth considering)</p>
+
+<p>##Comparison by Supplement</p>
+
+<p>Comparison of teeth length between supplements was done by a single T-test (\(\alpha\) = 0.05). 
+The null hypothesis(H0) is that there is no difference in teeth length between the two supplements</p>
+
+<pre><code class="r">hyp01&lt;- t.test(len~supp, ToothGrowth)
+hyp01
+</code></pre>
+
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  len by supp
+## t = 1.9153, df = 55.309, p-value = 0.06063
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -0.1710156  7.5710156
+## sample estimates:
+## mean in group OJ mean in group VC 
+##         20.66333         16.96333
+</code></pre>
+
+<pre><code class="r">hyp01$conf.int
+</code></pre>
+
+<pre><code>## [1] -0.1710156  7.5710156
+## attr(,&quot;conf.level&quot;)
+## [1] 0.95
+</code></pre>
+
+<pre><code class="r">hyp01$p.value
+</code></pre>
+
+<pre><code>## [1] 0.06063451
+</code></pre>
+
+<p>Further we did 3 t-tests look at the differences between supplements that were based on dose.</p>
+
+<pre><code class="r">hyp02A &lt;- t.test(len~supp, data = subset(ToothGrowth, dose == 0.5))
+
+hyp02A
+</code></pre>
+
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  len by supp
+## t = 3.1697, df = 14.969, p-value = 0.006359
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  1.719057 8.780943
+## sample estimates:
+## mean in group OJ mean in group VC 
+##            13.23             7.98
+</code></pre>
+
+<pre><code class="r">hyp02A$p.value
+</code></pre>
+
+<pre><code>## [1] 0.006358607
+</code></pre>
+
+<pre><code class="r">hyp02A$conf.int
+</code></pre>
+
+<pre><code>## [1] 1.719057 8.780943
+## attr(,&quot;conf.level&quot;)
+## [1] 0.95
+</code></pre>
+
+<pre><code class="r">hyp02B &lt;- t.test(len~supp, data = subset(ToothGrowth, dose == 1))
+
+hyp02B
+</code></pre>
+
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  len by supp
+## t = 4.0328, df = 15.358, p-value = 0.001038
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  2.802148 9.057852
+## sample estimates:
+## mean in group OJ mean in group VC 
+##            22.70            16.77
+</code></pre>
+
+<pre><code class="r">hyp02B$p.value
+</code></pre>
+
+<pre><code>## [1] 0.001038376
+</code></pre>
+
+<pre><code class="r">hyp02B$conf.int
+</code></pre>
+
+<pre><code>## [1] 2.802148 9.057852
+## attr(,&quot;conf.level&quot;)
+## [1] 0.95
+</code></pre>
+
+<pre><code class="r">hyp02C &lt;- t.test(len~supp, data = subset(ToothGrowth, dose == 2))
+
+hyp02C
+</code></pre>
+
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  len by supp
+## t = -0.046136, df = 14.04, p-value = 0.9639
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -3.79807  3.63807
+## sample estimates:
+## mean in group OJ mean in group VC 
+##            26.06            26.14
+</code></pre>
+
+<pre><code class="r">hyp02C$p.value
+</code></pre>
+
+<pre><code>## [1] 0.9638516
+</code></pre>
+
+<pre><code class="r">hyp02C$conf.int
+</code></pre>
+
+<pre><code>## [1] -3.79807  3.63807
+## attr(,&quot;conf.level&quot;)
+## [1] 0.95
+</code></pre>
+
+<p>Conclusion: 
+As one can see from the first table, there is no significant difference (0.06) between the two supplements and tooth growth. </p>
+
+<p>In the tests that were split by dose, there was a significant difference between the two supplements for doses:  0.5 mg &amp; 1mg (p-values of 0.006 &amp;0.001 respectively)</p>
+
+<p>##Comparison by Dose</p>
+
+<p>Comparison of teeth length between doses irrespective of supplement was done by three T-tests (\(\alpha\) = 0.05). </p>
+
+<p>The null hypothesis(H0) is that there is no difference in tooth length between dose 0.5 &amp; 2</p>
+
+<pre><code class="r">Split_Dose&lt;-split(ToothGrowth, ToothGrowth$dose)
+
+names(Split_Dose) &lt;- c(&quot;half&quot;, &quot;one&quot;,&quot;two&quot;)
+
+hypdose &lt;- t.test(Split_Dose$half$len, Split_Dose$two$len)
+hypdose
+</code></pre>
+
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  Split_Dose$half$len and Split_Dose$two$len
+## t = -11.799, df = 36.883, p-value = 4.398e-14
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -18.15617 -12.83383
+## sample estimates:
+## mean of x mean of y 
+##    10.605    26.100
+</code></pre>
+
+<pre><code class="r">hypdose$p.value
+</code></pre>
+
+<pre><code>## [1] 4.397525e-14
+</code></pre>
+
+<p>Conclusion: The p-value is 4.397525e-14 and therefore we reject the null hypothesis in favor of the alternate hypothesis. </p>
+
+<p>Q4: State your conclusions and the assumptions needed for your conclusions.</p>
+
+<p>##Assumptions: </p>
+
+<p>1) It is assumed that the data is collected from a representative, randomly selected portion of the total population. 
+2)The second assumption is the data, when plotted, results in a normal distribution, bell-shaped distribution curve.
+3)The final assumption is homogeneity of variance. Homogeneous, or equal, variance exists when the standard deviations of samples are approximately equal.</p>
+
+<p>##Conclusions: </p>
+
+<p>As one can see from the first table, there is no significant difference (0.06) between the two supplements and tooth growth. </p>
+
+<p>In the tests that were split by dose, there was a significant difference between the two supplements for doses:  0.5 mg &amp; 1mg (p-values of 0.006 &amp;0.001 respectively)</p>
+
+<p>The p-value is 4.397525e-14 and therefore we reject the null hypothesis in favor of the alternate hypothesis. </p>
+
+</body>
+
+</html>
